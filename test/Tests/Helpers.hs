@@ -17,6 +17,7 @@ module Tests.Helpers ( test
                      , TestResult(..)
                      , showDiff
                      , findPandoc
+                     , notIn
                      , (=?>)
                      , purely
                      , ToString(..)
@@ -26,6 +27,7 @@ module Tests.Helpers ( test
 
 import Prelude
 import Data.Algorithm.Diff
+import Data.List (isInfixOf)
 import qualified Data.Map as M
 import Data.Text (Text, unpack)
 import System.Directory
@@ -114,6 +116,17 @@ findPandoc = do
      then return pandocPath
      else error $ "findPandoc: could not find pandoc executable at "
                    ++ pandocPath
+
+notIn :: (ToString a, ToString b)
+      => (a -> b)  -- ^ function to test
+      -> String    -- ^ name of test case
+      -> (a, String)    -- ^ (input, expected value)
+      -> Test
+notIn fn name (input, notExpected) =
+  testCase name $ assertBool msg $ not included
+    where actual = toString $ fn input
+          included = notExpected `isInfixOf` actual
+          msg = notExpected ++ " should not be found in the result of parsing " ++ (toString input)
 
 vividize :: Diff String -> String
 vividize (Both s _) = "  " ++ s

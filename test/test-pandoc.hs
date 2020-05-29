@@ -10,6 +10,7 @@ import qualified Tests.Command
 import qualified Tests.Lua
 import qualified Tests.Lua.Module
 import qualified Tests.Old
+import qualified Tests.Readers.AsciiDoc
 import qualified Tests.Readers.Creole
 import qualified Tests.Readers.Docx
 import qualified Tests.Readers.DokuWiki
@@ -83,6 +84,7 @@ tests pandocPath = testGroup "pandoc tests"
           , testGroup "Odt" Tests.Readers.Odt.tests
           , testGroup "Txt2Tags" Tests.Readers.Txt2Tags.tests
           , testGroup "EPUB" Tests.Readers.EPUB.tests
+          , testGroup "AsciiDoc" Tests.Readers.AsciiDoc.tests
           , testGroup "Muse" Tests.Readers.Muse.tests
           , testGroup "Creole" Tests.Readers.Creole.tests
           , testGroup "Man" Tests.Readers.Man.tests
