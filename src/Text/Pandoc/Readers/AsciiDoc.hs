@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 -- | == Parses AsciiDoc files
 --
 -- We based the parser on the following <http://asciidoctor.org/docs/user-manual/ specification>
@@ -16,8 +17,10 @@
 module Text.Pandoc.Readers.AsciiDoc (readAsciiDoc) where
 
 import Data.Maybe
+import qualified Data.Text as T
 import Control.Monad (liftM)
 
+import Text.Pandoc.Class (report)
 import Text.Pandoc.Definition
 import Text.Pandoc.Options
 import Text.Pandoc.Parsing
@@ -222,7 +225,7 @@ commonURLScheme = ["https", "http", "ftp", "irc", "mailto"]
 
 link :: AsciiDocParser (F B.Inlines)
 link = try $ do
-  protocol <- oneOfStrings commonURLScheme
+  protocol <- T.unpack <$> oneOfStrings commonURLScheme
   sep <- string "://"
   domains <- many1 subDomain
   let domains' = mconcat domains
@@ -230,7 +233,7 @@ link = try $ do
   rest <- many $ noneOf " \n\t["
   mbAlias <- optionMaybe . try  $ (string "[") *> (mconcat <$> (manyTill inline (string "]")))
   let fullURL = protocol ++ sep ++ domains' ++ extension ++ rest
-  return $ (return $ B.link (fullURL)
+  return $ (return $ B.link (T.pack fullURL)
                  (domains' ++ extension))
                  <*> (linkAlias mbAlias (pure (B.str fullURL)))
 
@@ -274,7 +277,7 @@ whitespace = try $ do
 -- Add an auxiliary function for the asciidoc reader that is under development
 asciidoc :: ReaderOptions -> String -> IO (Either PandocError Pandoc)
 asciidoc o s =
-  warn ("\n[WARNING] You are using an AsciiDoc file as an input.\n" ++
-    "  The AsciiDoc reader is in alpha and numerous features are not yet implemented!\n" ++
-    "  Check out the documentation for more info\n")
+  report ("\n[WARNING] You are using an AsciiDoc file as an input.\n" <>
+      "  The AsciiDoc reader is in alpha and numerous features are not yet implemented!\n" <>
+      "  Check out the documentation for more info\n")
   >> (return $ readAsciiDoc o s)
